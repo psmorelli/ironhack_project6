@@ -1,9 +1,9 @@
-def ks_merge_files(input_file,output_file,extract_date):
+import pandas as pd
+import numpy as np
+import json
+from os import path
 
-    import pandas as pd
-    import numpy as np
-    import json
-    from os import path
+def ks_merge_files(input_file,output_file,extract_date):
 
     #
     df_kickstarter = pd.read_csv(input_file)
@@ -89,3 +89,25 @@ def ks_merge_files(input_file,output_file,extract_date):
         df_hist.to_pickle(output_file)
     else:
         df_kickstarter.to_pickle(output_file)
+    
+def success_failed_unique_rows(input_file,output_file,extract_month):
+
+    df_kickstarter = pd.read_pickle(input_file)
+
+    df_kickstarter = df_kickstarter[df_kickstarter["state"].isin(["successful","failed"])]
+
+    df_kickstarter['extract_month'] = pd.to_datetime(df_kickstarter['extract_date']).dt.to_period('M').dt.to_timestamp()
+    df_kickstarter['created_month'] = pd.to_datetime(df_kickstarter['created_at']).dt.to_period('M').dt.to_timestamp()
+
+    df_kickstarter = df_kickstarter[df_kickstarter["extract_month"] == extract_month]
+
+    df_kickstarter["rank_row"] = (df_kickstarter.sort_values(["usd_pledged"], ascending=True)
+             .groupby(['project_url'])
+             .cumcount() + 1)
+
+    df_kickstarter = df_kickstarter[df_kickstarter["rank_row"] == 1]
+    df_kickstarter = df_kickstarter.drop(columns="rank_row")
+
+    df_kickstarter.to_pickle(output_file)
+
+
