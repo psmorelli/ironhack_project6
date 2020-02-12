@@ -1,4 +1,4 @@
-def ks_merge_files(input_file,output_file):
+def ks_merge_files(input_file,output_file,extract_date):
 
     import pandas as pd
     import numpy as np
@@ -80,6 +80,7 @@ def ks_merge_files(input_file,output_file):
 
     #
     df_kickstarter = df_kickstarter[columns]
+    df_kickstarter["extract_date"] = pd.to_datetime(extract_date)
 
     # 
     if path.exists(output_file):
