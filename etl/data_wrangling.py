@@ -110,7 +110,7 @@ def kickstarter_fixed_dates(input_file,output_file):
     df_kickstarter = df_kickstarter[df_kickstarter["state"] != "suspended"]
 
     df_kickstarter["state_defined"] = np.where((df_kickstarter["state"] == "successful"),"successful" , "failed/canceled")
-    df_kickstarter["state_defined"] = np.where((df_kickstarter["usd_pledged"].ge(df_kickstarter["usd_goal"])),"successful" , df_ks["state_defined"])
+    df_kickstarter["state_defined"] = np.where((df_kickstarter["usd_pledged"].ge(df_kickstarter["usd_goal"])),"successful" , df_kickstarter["state_defined"])
 
     df_kickstarter.to_pickle(output_file)
 
