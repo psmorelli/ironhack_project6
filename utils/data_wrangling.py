@@ -130,3 +130,55 @@ def kickstarter_fixed_dates(input_file,output_file):
     # Save file into pickle format
     df_kickstarter.to_pickle(output_file)
 
+# Function to select most recent row for each project and fix state of project    
+def kickstarter_merge_years(input_files, output_file):
+
+    # Add each year pickle file into list
+    datasets = []
+    [datasets.append(pd.read_pickle(file)) for file in input_files]
+
+    #concat all dataframes
+    datasets_merged = pd.concat(datasets, ignore_index=True)
+
+    # Create mean goal per category level 1
+    df_category_lvl1 =(datasets_merged[["category_lvl1","usd_goal"]]
+        .groupby("category_lvl1")
+        .agg({"usd_goal":"mean"})
+        .rename(columns={"usd_goal":"mean_goal_cat_lvl1"})
+        .reset_index())
+
+    # Create mean goal per category level 2
+    df_category_lvl2 =(datasets_merged[["category_lvl2","usd_goal"]]
+        .groupby("category_lvl2")
+        .agg({"usd_goal":"mean"})
+        .rename(columns={"usd_goal":"mean_goal_cat_lvl2"})
+        .reset_index())
+
+    # Create mean goal per country
+    df_country =(datasets_merged[["country","usd_goal"]]
+        .groupby("country")
+        .agg({"usd_goal":"mean"})
+        .rename(columns={"usd_goal":"mean_goal_country"})
+        .reset_index())
+
+    # merge goal ratios dataframes 
+    datasets_merged = datasets_merged.merge(df_category_lvl1,how="left")
+    datasets_merged = datasets_merged.merge(df_category_lvl2,how="left")
+    datasets_merged = datasets_merged.merge(df_country,how="left")
+
+    # Create goal ratios
+    datasets_merged["goal_ratio_category_lvl1"] = datasets_merged["usd_goal"] / datasets_merged["mean_goal_cat_lvl1"]
+    datasets_merged["goal_ratio_category_lvl2"] = datasets_merged["usd_goal"] / datasets_merged["mean_goal_cat_lvl2"]
+    datasets_merged["goal_ratio_country"] = datasets_merged["usd_goal"] / datasets_merged["mean_goal_country"] 
+
+    # Select relevant columns
+    columns = ['slug', 'category_lvl1', 'category_lvl2', 'country',
+        'created_at', 'deadline', 'usd_goal', 'usd_pledged',
+        'backers_count', 'project_url',
+        'extract_date', 'state_defined','goal_ratio_category_lvl1','goal_ratio_category_lvl2','goal_ratio_country']
+
+    # filter project before 2019-10-01, supposed finished projects
+    datasets_merged = datasets_merged[datasets_merged.created_at.lt("2019-10-01")][columns]
+
+    # Save file
+    datasets_merged.to_csv(output_file, index=False)
