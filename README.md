@@ -95,6 +95,6 @@ This work was conducted within the ironhack "Visualizing Real World Data" projec
     A story published on the Public Tableau cloud service containing the analysis with highlights of insights.
 
 Tableau Story:
-[Kickstarte](https://public.tableau.com/profile/psmorelli#!/vizhome/Kickstarter_15816308999740/KIckstarter)
+[Kickstarter](https://public.tableau.com/profile/psmorelli#!/vizhome/Kickstarter_15816308999740/KIckstarter)
 
     
